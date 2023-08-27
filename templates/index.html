@@ -1,31 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Uploads</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css') }}"
-    />
-  </head>
-  <body>
-    <div class="app">
-      <div class="form-section">
-        <form action="/upload" method="post" enctype="multipart/form-data">
-          <input type="file" name="file" />
-          <input type="submit" name="Upload" />
-        </form>
-      </div>
-
-      <div class="images-section">
-        {% for image in images %}
-        <a href="{{url_for('serve_image',filename=image)}}" target="_blank">
-          <img src="/serve-image/{{image}}" alt="" />
-        </a>
-        {% endfor %}
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AudioCheck Hub</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <div class="app">
+    <div class="form-section">
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="audio/*" multiple />
+        <input type="submit" value="Upload" />
+      </form>
     </div>
-  </body>
+
+    <div class="audio-section">
+      <table>
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Size (Bytes)</th>
+            <th>Extension</th>
+            <th>Duration (seconds)</th>
+            <th>Play</th>
+          </tr>
+        </thead>
+       
+<tbody>
+    {% for file in files %}
+    <tr>
+      <td>{{ file.filename }}</td>
+      <td>{{ file.size }}</td>
+      <td>{{ file.extension }}</td>
+      <td>{{ file.duration }}</td>
+      <td>
+        {% if file.extension == '.mp3' %}
+        <audio controls>
+          <source src="{{ url_for('serve_file', filename=file.filename) }}" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
+        {% else %}
+        N/A
+        {% endif %}
+      </td>
+      <td>
+        <form action="{{ url_for('delete_file', file_id=file.id) }}" method="post">
+          <button type="submit" class="delete-button">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+      </table>
+    </div>
+
+    {% if total_duration > 600 %}
+    <div class="warning">
+      Warning: Total duration of uploaded audio files exceeds 10 minutes.
+    </div>
+    {% endif %}
+  </div>
+</body>
 </html>
