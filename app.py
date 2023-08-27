@@ -23,6 +23,7 @@ def calculate_total_duration(files):
             total_duration += len(audio) / 1000  # Convert to seconds
     return total_duration
 
+# Define database model
 class UploadedFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)
@@ -31,13 +32,18 @@ class UploadedFile(db.Model):
     extension = db.Column(db.String(10), nullable=False)
     duration = db.Column(db.Float, nullable=False)
 
+# Create the database tables
 with app.app_context():
     db.create_all()
 
+
+# Function to get audio duration using mutagen
 def get_audio_duration(filepath):
     audio = MP3(filepath)
     return audio.info.length
 
+
+# Route to display uploaded files and their details
 @app.route('/')
 def main():
     files = UploadedFile.query.all()
@@ -51,6 +57,8 @@ def main():
     return render_template('index.html', files=files, total_duration=total_duration)
 
 
+
+# Route to handle file upload
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
@@ -100,6 +108,7 @@ def delete_file(file_id):
 
     return redirect('/')
 
+# Route to serve files for playback
 @app.route('/serve-file/<filename>', methods=['GET'])
 def serve_file(filename):
     return send_from_directory(app.config['UPLOAD_DIRECTORY'], filename)
